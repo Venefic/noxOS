@@ -1,2 +1,10 @@
 # Build files
 *.out
+build/*
+
+# Image
+isodir
+*.iso
+
+# editor
+.vscode
