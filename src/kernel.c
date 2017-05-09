@@ -73,29 +73,48 @@ void terminal_setcolor(uint8_t color) {
     terminal_color = color;
 }
 
+void scroll(void) {
+    for (size_t y = 0; y < VGA_HEIGHT; y++) {
+        for (size_t x = 0; x < VGA_WIDTH; x++) {
+            const size_t index = y * VGA_WIDTH + x;
+            terminal_buffer[index] = terminal_buffer[(y + 1) * VGA_WIDTH + x];
+        }
+    }
+    // Clear the last row
+    for (size_t x = x; x < VGA_WIDTH; x++) {
+        const size_t index = (VGA_HEIGHT - 1) * VGA_WIDTH + x;
+        terminal_buffer[index] = vga_entry(' ', terminal_color);
+    }
+}
+
 void terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
     const size_t index = y * VGA_WIDTH + x;
     terminal_buffer[index] = vga_entry(c, color);
 }
 
+void reset(void) {
+    if (++terminal_row == VGA_HEIGHT) {
+        terminal_row = VGA_HEIGHT - 1;
+        scroll();
+    }
+}
+
 void terminal_putchar(char c) {
-    terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+    if (c == '\n') {
+        terminal_column = 0;
+        reset();
+    } else {
+        terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+    }
     if (++terminal_column == VGA_WIDTH) {
         terminal_column = 0;
-        if (++terminal_row == VGA_HEIGHT) {
-            terminal_row = 0;
-        }
+        reset();
     }
 }
 
 void terminal_write(const char* data, size_t size) {
     for (size_t i = 0; i < size; i++) {
-        if (data[i] == '\n') {
-            terminal_row++;
-            terminal_column = 0;
-        } else {
-            terminal_putchar(data[i]);
-        }
+        terminal_putchar(data[i]);
     }
 }
 
@@ -106,8 +125,5 @@ void terminal_writestring(const char* data) {
 void kernel_main(void) {
     /* Initialize terminal interface */
     terminal_initialize();
-
-    /* TODO: newline support */
     terminal_writestring("Hello, kernel world!\n");
-    terminal_writestring("whadap?\n");
 }
