@@ -90,7 +90,12 @@ void terminal_putchar(char c) {
 
 void terminal_write(const char* data, size_t size) {
     for (size_t i = 0; i < size; i++) {
-        terminal_putchar(data[i]);
+        if (data[i] == '\n') {
+            terminal_row++;
+            terminal_column = 0;
+        } else {
+            terminal_putchar(data[i]);
+        }
     }
 }
 
@@ -104,4 +109,5 @@ void kernel_main(void) {
 
     /* TODO: newline support */
     terminal_writestring("Hello, kernel world!\n");
+    terminal_writestring("whadap?\n");
 }
