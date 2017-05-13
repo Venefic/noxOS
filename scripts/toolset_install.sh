@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Preparation
 export PREFIX="$HOME/opt/cross"
